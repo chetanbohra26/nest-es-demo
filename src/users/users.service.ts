@@ -1,14 +1,18 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly esService: ElasticsearchService) {}
+  constructor(
+    private readonly esService: ElasticsearchService,
+    private readonly configService: ConfigService,
+  ) {}
 
   async get() {
     const value = await this.esService.search({
-      index: 'cartoons',
-      query: { fuzzy: { author: 'Chetan' } },
+      index: this.configService.get('ES_INDEX_NAME'),
+      query: { fuzzy: { name: 'Chetan' } },
     });
 
     return value;
@@ -16,11 +20,11 @@ export class UsersService {
 
   async add() {
     await this.esService.index({
-      index: 'cartoons',
+      index: this.configService.get('ES_INDEX_NAME'),
       document: {
-        title: 'Title',
-        description: 'Desc',
-        author: 'chetan',
+        name: 'chetan',
+        designation: 'newbie',
+        technologies: ['aws', 'javascript', 'react'],
       },
     });
     return { success: true, message: 'Saved Successfully' };
